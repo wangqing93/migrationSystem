@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.migration.dao.destination.DestinationMapper">
+    <insert id="insertNotBlobValue" parameterType="java.util.List" useGeneratedKeys="false">
+        insert all
+        <foreach collection="values" item="item" index="index">
+            ${item}
+        </foreach>
+        select 1 from dual
+    </insert>
+    <select id="getColumnType" resultType="map">
+        SELECT column_name, data_type FROM all_tab_cols WHERE table_name = '${tableName}' and owner='ADM63'
+    </select>
+
+    <select id="getPrimaryKey" resultType="map">
+        select column_name from user_cons_columns where table_name = '${tableName}' and
+        constraint_name in (select constraint_name from user_constraints where table_name = '${tableName}' and constraint_type ='P')
+    </select>
+    <update id="insertBlobValue">
+        update ${tableName}
+        set ${fileNameColumn}='${fileName}', ${blobFileColumn}=rawtohex('${blobFile}')
+        where ${primaryCondition}
+    </update>
+    <select id="getBlobTest" resultType="map">
+        select CJTTJ  from CJCGZL_CCCSPJCG where DBID='03a8e1b9039342df8aa7d6f2b914ea0b'
+    </select>
+<!--    void insertTask(@Param(value="taskId") int taskId,-->
+<!--    @Param(value="taskName") String taskName,-->
+<!--    @Param(value="startTaskTime") Date startTaskTime,-->
+<!--    @Param(value="isRepeated") int isRepeated,-->
+<!--    @Param(value="period") int period,-->
+<!--    @Param(value="remarks") String remarks,-->
+<!--    @Param(value="isAll") int isAll,-->
+<!--    @Param(value="isDeleted") int isDeleted);-->
+
+    <insert id="insertTask" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into Migration_Task(task_id, Task_Name, Start_Task_Time, Is_Repeated, remarks,Isall,Isdeleted)
+        values(${taskId}, '${taskName}', to_date('${startTaskTime}'), ${isRepeated}, '${remarks}', ${isAll}, ${isDeleted})
+    </insert>
+    <insert id="insertTableNamesForTaskId" parameterType="java.util.Set" useGeneratedKeys="false">
+        insert all
+        <foreach collection="tableNames" item="tableName" index="index">
+            into task_tablename_relation(task_id, table_name) values(${taskId}, '${tableName}')
+        </foreach>
+        select 1 from dual
+    </insert>
+    <update id="deleteTask" parameterType="java.util.List" useGeneratedKeys="false">
+        update Migration_Task set Isdeleted=1 where task_id=${taskId}
+    </update>
+    <update id="modifyTask" parameterType="java.util.List" useGeneratedKeys="false">
+        update Migration_Task set Start_Task_Time=to_date('${newStartTime}') where task_id=${taskId}
+    </update>
+    <select id="getBlobColumn" resultType="com.data.migration.entity.TABLE_BLOB_COLUMNS">
+        select * from TABLE_BLOB_COLUMNS where table_name = '${tableName}'
+    </select>
+    <select id="getTables" resultType="map">
+        select DISTINCT TABLE_NAME from user_tab_columns where DATA_TYPE='BLOB'
+    </select>
+    <update id="updateItem">
+        update ${tableName}
+        set ${updateItems}
+        where ${primaryCondition}
+    </update>
+    <select id="getTasks" resultType="map">
+        select * from Migration_Task where Isdeleted=0
+    </select>
+    <select id="getTablesOneTask" resultType="map">
+        select table_name from task_tablename_relation where task_id=${taskId}
+    </select>
+    <select id="getTaskId" resultType="integer">
+        select NVL(MAX(TASK_ID), 0) from TASK_LOG
+    </select>
+    <insert id="insertTableBlobColumns" useGeneratedKeys="false">
+        insert into TABLE_BLOB_COLUMNS values ('${tableName}', '${fileNameColumn}', '${blobColumn}')
+    </insert>
+    <insert id="insertMigratingTable"  useGeneratedKeys="false">
+        insert into TABLE_INFORMATION values ('${tableName}', ${isMigrating})
+    </insert>
+    <delete id="deleteTable">
+        delete from ${tableName}
+    </delete>
+    <select id="getStartTime" resultType="date">
+        select * from (select start_time from task_log where table_name='${tableName}' order by start_time desc) where rownum = 1
+    </select>
+</mapper>

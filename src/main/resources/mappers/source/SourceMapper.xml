@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.migration.dao.source.SourceMapper">
+    <select id="getBlobValue" resultType="map">
+        select ${fileNameColumn} as fileName, ${blobColumn} from ${tableName} where ${condition} ${primaryCondition}
+    </select>
+    <select id="getPrimaryKeyList" resultType="map">
+        select ${primaryKey} from ${tableName}
+    </select>
+    <select id="getNotBlobValue" resultType="map">
+        select ${columns} from ${tableName}
+    </select>
+    <select id="getTableAndBlobColumns" resultType="map">
+        select TABLE_NAME, t.column_name from user_tab_columns t where DATA_TYPE='BLOB'
+    </select>
+    <select id="getNewItem" resultType="map">
+        select * from ${tableName} where CJSJ >= to_date('${startTime}', 'YYYY-MM-DD HH24:MI:SS')
+    </select>
+    <select id="getUpdatedItem" resultType="map">
+        select * from ${tableName} where XGSJ >= to_date('${startTime}', 'YYYY-MM-DD HH24:MI:SS')
+    </select>
+    <select id="getAllItem" resultType="map">
+        select * from ${tableName}
+    </select>
+</mapper>
